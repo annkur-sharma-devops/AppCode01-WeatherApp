@@ -65,16 +65,4 @@
     </plugins>
   </build>
 
-  <!-- For Nexus3 Build Repo -->
-  <distributionManagement>
-    <repository>
-        <id>maven-release-repo-weather-app</id>
-        <url>http://localhost:8899/repository/maven-release-repo-weather-app/</url>
-    </repository>
-    <snapshotRepository>
-        <id>maven-snapshot-repo-weather-app</id>
-        <url>http://localhost:8899/repository/maven-snapshot-repo-weather-app/</url>
-    </snapshotRepository>
-  </distributionManagement>
-
 </project>
