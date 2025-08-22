@@ -27,7 +27,7 @@
         To make search more precise put the city's name, comma, 2-letter country code.  
         <br>Example: <b>Paris, FR</b> or <b>Delhi, IN</b>
     </div>
-    <br>
+    <br/>
     <form id="searchForm" class="search">
         <input type="text" id="cityInput" placeholder="Search city (e.g., London)" autocomplete="off"/>
         <button type="submit">Search</button>
@@ -56,10 +56,11 @@
     <div class="guid-box">
         <div><strong>Session GUID</strong></div>
         <code><%= guid %></code>
-        <div class="hint">Persists for this session (survives page refresh).</div>
+        <br/>
+        <div class="hint">Application Version 1.0.0</div>
     </div>
 
-    <br>
+    <br/>
 
     <footer>
         Powered by <a href="https://openweathermap.org/" target="_blank" rel="noopener">OpenWeather</a>
