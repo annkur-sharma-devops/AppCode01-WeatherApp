@@ -29,7 +29,7 @@
     </div>
     <br/>
     <form id="searchForm" class="search">
-        <input type="text" id="cityInput" placeholder="Search city (e.g., London)" autocomplete="off"/>
+        <input type="text" id="cityInput" placeholder="Search city (e.g., Chandigarh, IN)" autocomplete="off"/>
         <button type="submit">Search</button>
         <button type="button" id="geoBtn" title="Use current location">Use my location</button>
     </form>
@@ -56,7 +56,7 @@
     <div class="guid-box">
         <div><strong>Session GUID</strong></div>
         <code><%= guid %></code>
-        <br/>
+        <br>
         <div class="hint">Application Version 1.0.0</div>
     </div>
 
