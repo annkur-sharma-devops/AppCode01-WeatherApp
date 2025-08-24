@@ -28,7 +28,7 @@ jobs:
             "-Dsonar.login=$SONAR_TOKEN"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: cmd
+        shell: powershell
         
       # Upload artifact to Nexus
       - name: Deploy to Nexus
@@ -47,7 +47,7 @@ jobs:
             "-Durl=http://localhost:8899/repository/maven-release-repo-weather-app/" `
             "-Dusername=$NEXUS_USER" `
             "-Dpassword=$NEXUS_PASS"
-        shell: cmd
+        shell: powershell
         
       # (Optional) Deploy to Tomcat if reachable
       - name: Deploy WAR to Tomcat
