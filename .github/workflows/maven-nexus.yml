@@ -42,7 +42,7 @@ jobs:
           # Use double quotes for proper expansion
           mvn deploy:deploy-file `
             "-DgroupId=com.example" `
-            "-DartifactId=weather-app" `
+            "-DartifactId=weather-app-1.1" `
             "-Dversion=$VERSION" `
             "-Dpackaging=war" `
             "-Dfile=target/weather-app.war" `
