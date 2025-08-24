@@ -85,28 +85,20 @@ jobs:
         env:
           JFROG_USER: ${{ secrets.JFROG_USER }}
           JFROG_API_KEY: ${{ secrets.JFROG_API_KEY }}
-          DEPLOY_TYPE: release  # 'snapshot' or 'release'
+          DEPLOY_TYPE: release  # or snapshot
         run: |
-          $VERSION = "1.1.${{ github.run_number }}"
+          $VERSION="1.1.${{ github.run_number }}"
           Write-Host "Uploading weather-app-$VERSION.war to JFrog"
       
-          # Decide repository based on DEPLOY_TYPE
           if ($env:DEPLOY_TYPE -eq "snapshot") {
-              $REPO = "maven-snapshot-local"
+              $REPO="maven-snapshot-local"
           } else {
-              $REPO = "maven-releases-local"
+              $REPO="maven-releases-local"
           }
       
-          $ARTIFACT_PATH = "weather-app-1.1/$VERSION/weather-app-$VERSION.war"
-          $URL = "https://annkursharma.jfrog.io/artifactory/$REPO/$ARTIFACT_PATH"
-          Write-Host "Uploading to $URL"
+          $ARTIFACT_PATH="weather-app-1.1/$VERSION/weather-app-$VERSION.war"
+          $URL="https://annkursharma.jfrog.io/artifactory/$REPO/$ARTIFACT_PATH"
       
-          # Encode credentials in Base64 for Basic Auth
-          $pair = "$env:JFROG_USER:$env:JFROG_API_KEY"
-          $bytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
-          $encoded = [System.Convert]::ToBase64String($bytes)
-          $headers = @{ Authorization = "Basic $encoded" }
-      
-          # Upload the WAR
-          Invoke-WebRequest -Uri $URL -Method Put -InFile "target/weather-app.war" -Headers $headers
+          Write-Host "Uploading to $URL using curl..."
+          curl -u "$env:JFROG_USER:$env:JFROG_API_KEY" -T "target/weather-app.war" "$URL"
         shell: powershell
