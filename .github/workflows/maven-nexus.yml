@@ -55,8 +55,9 @@ jobs:
       # (Optional) Deploy to Tomcat if reachable
       - name: Deploy WAR to Tomcat
         run: |
-          VERSION=1.1.${{ github.run_number }}
-          ARTIFACT_URL="http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app/$VERSION/weather-app-$VERSION.war"
+          $VERSION = "1.1.${{ github.run_number }}"
+          Write-Host "Downloading version $VERSION"
+          ARTIFACT_URL="http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app-1.1/$VERSION/weather-app-$VERSION.war"
           echo "Downloading from Nexus: $ARTIFACT_URL"
           curl -u ${{ secrets.NEXUS_USER }}:${{ secrets.NEXUS_PASS }} -O $ARTIFACT_URL
           echo "Deploying to Tomcat..."
