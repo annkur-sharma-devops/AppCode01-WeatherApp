@@ -54,11 +54,17 @@ jobs:
         
       # (Optional) Deploy to Tomcat if reachable
       - name: Deploy WAR to Tomcat
+        shell: powershell
         run: |
           $VERSION = "1.1.${{ github.run_number }}"
           Write-Host "Downloading version $VERSION"
-          ARTIFACT_URL="http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app-1.1/$VERSION/weather-app-$VERSION.war"
-          echo "Downloading from Nexus: $ARTIFACT_URL"
-          curl -u ${{ secrets.NEXUS_USER }}:${{ secrets.NEXUS_PASS }} -O $ARTIFACT_URL
-          echo "Deploying to Tomcat..."
-          curl -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASS }} --upload-file weather-app-$VERSION.war "http://your-tomcat-host:5555/manager/text/deploy?path=/weather-app&update=true"
+      
+          $ARTIFACT_URL = "http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app-1.1/$VERSION/weather-app-$VERSION.war"
+          Write-Host "Downloading from Nexus: $ARTIFACT_URL"
+      
+          # Download the WAR from Nexus
+          curl -u "${{ secrets.NEXUS_USER }}:${{ secrets.NEXUS_PASS }}" -O $ARTIFACT_URL
+      
+          # Deploy WAR to Tomcat
+          Write-Host "Deploying to Tomcat..."
+          curl -u "${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASS }}" --upload-file "weather-app-$VERSION.war" "http://your-tomcat-host:5555/manager/text/deploy?path=/weather-app&update=true"
