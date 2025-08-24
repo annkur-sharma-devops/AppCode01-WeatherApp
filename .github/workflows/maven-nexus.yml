@@ -38,21 +38,23 @@ jobs:
         run: |
           $VERSION = "1.1.${{ github.run_number }}"
 
-          # Set version in pom.xml (optional, only if you want pom version bumped)
+          echo "Deploying version $VERSION"
+
+          # Optional: update pom.xml version
           mvn versions:set -DnewVersion=$VERSION
 
-          # Deploy using deploy:deploy-file (not "clean deploy")
+          # Deploy WAR to Nexus
           mvn deploy:deploy-file `
             -DgroupId=com.example `
             -DartifactId=weather-app `
-            -Dversion=$VERSION `
+            -Dversion=${VERSION} `
             -Dpackaging=war `
             -Dfile=target/weather-app.war `
             -DrepositoryId=nexus `
             -Durl=http://localhost:8899/repository/maven-release-repo-weather-app/ `
             -Dusername=$env:NEXUS_USER `
             -Dpassword=$env:NEXUS_PASS
-        shell: powershell
+        shell: pwsh
         
       # (Optional) Deploy to Tomcat if reachable
       - name: Deploy WAR to Tomcat
