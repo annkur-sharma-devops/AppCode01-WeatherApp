@@ -46,7 +46,7 @@ jobs:
             "-Dversion=$VERSION" `
             "-Dpackaging=war" `
             "-Dfile=target/weather-app.war" `
-            "-DrepositoryId=nexus" `
+            "-DrepositoryId=maven-release-repo-weather-app" `
             "-Durl=http://localhost:8899/repository/maven-release-repo-weather-app/" `
             "-Dusername=$env:NEXUS_USER" `
             "-Dpassword=$env:NEXUS_PASS"
