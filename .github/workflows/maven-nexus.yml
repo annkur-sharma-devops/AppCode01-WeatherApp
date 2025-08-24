@@ -84,8 +84,8 @@ jobs:
       - name: Upload WAR to JFrog
         env:
           JFROG_USER: ${{ secrets.JFROG_USER }}
-          JFROG_PASS: ${{ secrets.JFROG_PASS }}
-          DEPLOY_TYPE: release  # Set to 'snapshot' or 'release'
+          JFROG_API_KEY: ${{ secrets.JFROG_API_KEY }}
+          DEPLOY_TYPE: release  # 'snapshot' or 'release'
         run: |
           $VERSION = "1.1.${{ github.run_number }}"
           Write-Host "Uploading weather-app-$VERSION.war to JFrog"
@@ -99,11 +99,10 @@ jobs:
       
           $ARTIFACT_PATH = "weather-app-1.1/$VERSION/weather-app-$VERSION.war"
           $URL = "https://annkursharma.jfrog.io/artifactory/$REPO/$ARTIFACT_PATH"
-          
           Write-Host "Uploading to $URL"
       
-          # Encode credentials in Base64 for basic auth
-          $pair = "$env:JFROG_USER:$env:JFROG_PASS"
+          # Encode credentials in Base64 for Basic Auth
+          $pair = "$env:JFROG_USER:$env:JFROG_API_KEY"
           $bytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
           $encoded = [System.Convert]::ToBase64String($bytes)
           $headers = @{ Authorization = "Basic $encoded" }
