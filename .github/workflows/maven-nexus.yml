@@ -37,11 +37,15 @@ jobs:
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
         run: |
           $VERSION = "1.1.${{ github.run_number }}"
-          mvn versions:set -DnewVersion=1.1.${VERSION}
-          mvn clean deploy -DskipTests `
+
+          # Set version in pom.xml (optional, only if you want pom version bumped)
+          mvn versions:set -DnewVersion=$VERSION
+
+          # Deploy using deploy:deploy-file (not "clean deploy")
+          mvn deploy:deploy-file `
             -DgroupId=com.example `
             -DartifactId=weather-app `
-            -Dversion="$VERSION" `
+            -Dversion=$VERSION `
             -Dpackaging=war `
             -Dfile=target/weather-app.war `
             -DrepositoryId=nexus `
