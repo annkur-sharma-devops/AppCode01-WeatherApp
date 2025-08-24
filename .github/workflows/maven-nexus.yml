@@ -80,7 +80,7 @@ jobs:
           Invoke-WebRequest -Uri "http://localhost:5556/manager/text/deploy?path=/weather-app&update=true" -Method Put -InFile "weather-app-1.1-$VERSION.war" -Credential $tomcatCred
         shell: powershell
 
-        # (Optional) Deploy to JFrog
+      # (Optional) Deploy to JFrog
       - name: Upload WAR to JFrog
         env:
           JFROG_USER: ${{ secrets.JFROG_USER }}
@@ -89,22 +89,25 @@ jobs:
         run: |
           $VERSION = "1.1.${{ github.run_number }}"
           Write-Host "Uploading weather-app-$VERSION.war to JFrog"
-     
+      
           # Decide repository based on DEPLOY_TYPE
           if ($env:DEPLOY_TYPE -eq "snapshot") {
               $REPO = "maven-snapshot-local"
           } else {
               $REPO = "maven-releases-local"
           }
-        
+      
           $ARTIFACT_PATH = "weather-app-1.1/$VERSION/weather-app-$VERSION.war"
           $URL = "https://annkursharma.jfrog.io/artifactory/$REPO/$ARTIFACT_PATH"
-        
+          
           Write-Host "Uploading to $URL"
-        
-          # Upload using basic auth
-          Invoke-WebRequest -Uri $URL -Method Put -InFile "target/weather-app.war" `
-            -Credential (New-Object System.Management.Automation.PSCredential($env:JFROG_USER, `
-            (ConvertTo-SecureString $env:JFROG_PASS -AsPlainText -Force)))
+      
+          # Encode credentials in Base64 for basic auth
+          $pair = "$env:JFROG_USER:$env:JFROG_PASS"
+          $bytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
+          $encoded = [System.Convert]::ToBase64String($bytes)
+          $headers = @{ Authorization = "Basic $encoded" }
+      
+          # Upload the WAR
+          Invoke-WebRequest -Uri $URL -Method Put -InFile "target/weather-app.war" -Headers $headers
         shell: powershell
-
