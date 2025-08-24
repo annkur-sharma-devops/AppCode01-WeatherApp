@@ -36,18 +36,15 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
         run: |
+          # Set dynamic version
           $VERSION = "1.1.${{ github.run_number }}"
+          Write-Host "Deploying version $VERSION"
 
-          echo "Deploying version $VERSION"
-
-          # Optional: update pom.xml version
-          mvn versions:set -DnewVersion=$VERSION
-
-          # Deploy WAR to Nexus
+          # Deploy WAR directly to Nexus
           mvn deploy:deploy-file `
             -DgroupId=com.example `
             -DartifactId=weather-app `
-            -Dversion=${VERSION} `
+            -Dversion=$VERSION `
             -Dpackaging=war `
             -Dfile=target/weather-app.war `
             -DrepositoryId=nexus `
