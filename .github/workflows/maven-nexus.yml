@@ -85,7 +85,7 @@ jobs:
         env:
           JFROG_USER: ${{ secrets.JFROG_USER }}
           JFROG_API_KEY: ${{ secrets.JFROG_API_KEY }}
-          DEPLOY_TYPE: release  # or snapshot
+          DEPLOY_TYPE: release
         run: |
           $VERSION="1.1.${{ github.run_number }}"
           Write-Host "Uploading weather-app-$VERSION.war to JFrog"
@@ -99,6 +99,7 @@ jobs:
           $ARTIFACT_PATH="weather-app-1.1/$VERSION/weather-app-$VERSION.war"
           $URL="https://annkursharma.jfrog.io/artifactory/$REPO/$ARTIFACT_PATH"
       
-          Write-Host "Uploading to $URL using curl..."
-          curl -u "$env:JFROG_USER:$env:JFROG_API_KEY" -T "target/weather-app.war" "$URL"
+          Write-Host "Uploading to $URL using curl.exe..."
+          curl.exe -u "$env:JFROG_USER:$env:JFROG_API_KEY" -T "target/weather-app.war" "$URL"
         shell: powershell
+
