@@ -20,15 +20,15 @@ jobs:
         run: mvn -B clean verify install
 
       # Run SonarQube analysis
-      # - name: SonarQube Scan
-      #   run: |
-      #     sonar-scanner `
-      #       "-Dsonar.projectKey=weather-app" `
-      #       "-Dsonar.host.url=http://localhost:9000" `
-      #       "-Dsonar.login=$SONAR_TOKEN"
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #   shell: powershell
+      - name: SonarQube Scan
+        run: |
+          sonar-scanner `
+        #    "-Dsonar.projectKey=weather-app" `
+        #    "-Dsonar.host.url=http://localhost:9000" `
+        #    "-Dsonar.login=$SONAR_TOKEN"
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
         
       # Upload artifact to Nexus
       - name: Deploy to Nexus
