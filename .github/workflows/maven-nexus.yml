@@ -28,14 +28,24 @@ jobs:
         run: mvn -B clean verify install
 
       # Run SonarQube analysis
+
+      - name: Install SonarQube Scanner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip wget
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+          unzip sonar-scanner-cli-*.zip
+          sudo mv sonar-scanner-* /opt/sonar-scanner
+          echo "/opt/sonar-scanner/bin" >> $GITHUB_PATH
+
       - name: SonarQube Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           sonar-scanner \
             -Dsonar.projectKey=weather-app \
             -Dsonar.host.url=http://localhost:9000 \
             -Dsonar.login=$SONAR_TOKEN
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       # Upload artifact to Nexus
       - name: Deploy to Nexus
