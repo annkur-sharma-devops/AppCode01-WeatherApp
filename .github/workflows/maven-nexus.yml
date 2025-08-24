@@ -15,14 +15,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Set up JDK (adjust to your project’s JDK version)
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '11'
-          cache: maven
-
       # Build with Maven
       - name: Build with Maven
         run: mvn -B clean verify install
