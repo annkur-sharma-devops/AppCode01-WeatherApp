@@ -40,7 +40,7 @@ jobs:
           mvn deploy:deploy-file `
             -DgroupId=com.example `
             -DartifactId=weather-app `
-            -Dversion=$VERSION `
+            -Dversion="$VERSION" `
             -Dpackaging=war `
             -Dfile=target/weather-app.war `
             -DrepositoryId=nexus `
