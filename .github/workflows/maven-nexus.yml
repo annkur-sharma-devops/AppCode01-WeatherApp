@@ -1,0 +1,66 @@
+name: Maven Build & Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Set up JDK (adjust to your project’s JDK version)
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: maven
+
+      # Build with Maven
+      - name: Build with Maven
+        run: mvn -B clean verify install
+
+      # Run SonarQube analysis
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=weather-app \
+            -Dsonar.host.url=http://localhost:9000 \
+            -Dsonar.login=$SONAR_TOKEN
+
+      # Upload artifact to Nexus
+      - name: Deploy to Nexus
+        env:
+          NEXUS_USER: ${{ secrets.NEXUS_USER }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
+        run: |
+          VERSION=1.1.${{ github.run_number }}
+          mvn deploy:deploy-file \
+            -DgroupId=com.example \
+            -DartifactId=weather-app \
+            -Dversion=$VERSION \
+            -Dpackaging=war \
+            -Dfile=target/weather-app.war \
+            -DrepositoryId=nexus \
+            -Durl=http://localhost:8899/repository/maven-release-repo-weather-app/ \
+            -Dusername=$NEXUS_USER \
+            -Dpassword=$NEXUS_PASS
+
+      # (Optional) Deploy to Tomcat if reachable
+      - name: Deploy WAR to Tomcat
+        run: |
+          VERSION=1.1.${{ github.run_number }}
+          ARTIFACT_URL="http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app/$VERSION/weather-app-$VERSION.war"
+          echo "Downloading from Nexus: $ARTIFACT_URL"
+          curl -u ${{ secrets.NEXUS_USER }}:${{ secrets.NEXUS_PASS }} -O $ARTIFACT_URL
+          echo "Deploying to Tomcat..."
+          curl -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASS }} --upload-file weather-app-$VERSION.war "http://your-tomcat-host:8080/manager/text/deploy?path=/weather-app&update=true"
