@@ -23,9 +23,9 @@ jobs:
       - name: SonarQube Scan
         run: |
           sonar-scanner `
-            -Dsonar.projectKey=weather-app `
-            -Dsonar.host.url=http://localhost:9000 `
-            -Dsonar.login=$SONAR_TOKEN
+            "-Dsonar.projectKey=weather-app" `
+            "-Dsonar.host.url=http://localhost:9000" `
+            "-Dsonar.login=$SONAR_TOKEN"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
@@ -36,16 +36,16 @@ jobs:
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
         run: |
           VERSION=1.1.${{ github.run_number }}
-          mvn deploy:deploy-file `
-            -DgroupId=com.example `
-            -DartifactId=weather-app `
-            -Dversion=$VERSION `
-            -Dpackaging=war `
-            -Dfile=target/weather-app.war `
-            -DrepositoryId=nexus `
-            -Durl=http://localhost:8899/repository/maven-release-repo-weather-app/ `
-            -Dusername=$NEXUS_USER `
-            -Dpassword=$NEXUS_PASS
+          mvn deploy:deploy-file" `
+            "-DgroupId=com.example" `
+            "-DartifactId=weather-app" `
+            "-Dversion=$VERSION" `
+            "-Dpackaging=war" `
+            "-Dfile=target/weather-app.war" `
+            "-DrepositoryId=nexus" `
+            "-Durl=http://localhost:8899/repository/maven-release-repo-weather-app/" `
+            "-Dusername=$NEXUS_USER" `
+            "-Dpassword=$NEXUS_PASS"
 
       # (Optional) Deploy to Tomcat if reachable
       - name: Deploy WAR to Tomcat
