@@ -54,22 +54,29 @@ jobs:
         
       # (Optional) Deploy to Tomcat if reachable
       - name: Deploy WAR to Tomcat
+        env:
+          NEXUS_USER: ${{ secrets.NEXUS_USER }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
+          TOMCAT_PASS: ${{ secrets.TOMCAT_PASS }}
         run: |
           $VERSION = "1.1.${{ github.run_number }}"
           Write-Host "Downloading version $VERSION"
-          
-          $ARTIFACT_URL = "http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app-1.1/$VERSION/weather-app-$VERSION.war"
+
+          # Correct Nexus artifact URL for artifactId weather-app-1.1
+          $ARTIFACT_URL = "http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app-1.1/$VERSION/weather-app-1.1-$VERSION.war"
           Write-Host "Downloading from Nexus: $ARTIFACT_URL"
-          
-          # Create a credential object for basic auth
-          $securePassword = ConvertTo-SecureString "***" -AsPlainText -Force
-          $cred = New-Object System.Management.Automation.PSCredential("***", $securePassword)
-          
+
+          # Create Nexus credential
+          $securePassword = ConvertTo-SecureString $env:NEXUS_PASS -AsPlainText -Force
+          $cred = New-Object System.Management.Automation.PSCredential($env:NEXUS_USER, $securePassword)
+
           # Download the WAR
-          Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile "weather-app-$VERSION.war" -Credential $cred
-          
+          Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile "weather-app-1.1-$VERSION.war" -Credential $cred
+
           # Deploy WAR to Tomcat
           Write-Host "Deploying to Tomcat..."
-          $tomcatCred = New-Object System.Management.Automation.PSCredential("***", (ConvertTo-SecureString "***" -AsPlainText -Force))
-          Invoke-WebRequest -Uri "http://localhost:5556/manager/text/deploy?path=/weather-app&update=true" -Method Put -InFile "weather-app-$VERSION.war" -Credential $tomcatCred
+          $tomcatCred = New-Object System.Management.Automation.PSCredential($env:TOMCAT_USER, (ConvertTo-SecureString $env:TOMCAT_PASS -AsPlainText -Force))
+          Invoke-WebRequest -Uri "http://localhost:5556/manager/text/deploy?path=/weather-app&update=true" -Method Put -InFile "weather-app-1.1-$VERSION.war" -Credential $tomcatCred
+        shell: powershell
 
