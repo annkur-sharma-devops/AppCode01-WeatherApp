@@ -99,7 +99,8 @@ jobs:
           $ARTIFACT_PATH="weather-app-1.1/$VERSION/weather-app-$VERSION.war"
           $URL="https://annkursharma.jfrog.io/artifactory/$REPO/$ARTIFACT_PATH"
       
-          Write-Host "Uploading to $URL using curl.exe..."
-          curl.exe -u "$env:JFROG_USER:$env:JFROG_API_KEY" -T "target/weather-app.war" "$URL"
+          Write-Host "Uploading to $URL using curl.exe with progress..."
+          curl.exe -u "$env:JFROG_USER:$env:JFROG_API_KEY" -T "target/weather-app.war" "$URL" --progress-bar
+          Write-Host "Upload finished!"
         shell: powershell
 
