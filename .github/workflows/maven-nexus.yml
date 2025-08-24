@@ -54,17 +54,22 @@ jobs:
         
       # (Optional) Deploy to Tomcat if reachable
       - name: Deploy WAR to Tomcat
-        shell: powershell
         run: |
           $VERSION = "1.1.${{ github.run_number }}"
           Write-Host "Downloading version $VERSION"
-      
+          
           $ARTIFACT_URL = "http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app-1.1/$VERSION/weather-app-$VERSION.war"
           Write-Host "Downloading from Nexus: $ARTIFACT_URL"
-      
-          # Download the WAR from Nexus
-          curl -u "${{ secrets.NEXUS_USER }}:${{ secrets.NEXUS_PASS }}" -O $ARTIFACT_URL
-      
+          
+          # Create a credential object for basic auth
+          $securePassword = ConvertTo-SecureString "***" -AsPlainText -Force
+          $cred = New-Object System.Management.Automation.PSCredential("***", $securePassword)
+          
+          # Download the WAR
+          Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile "weather-app-$VERSION.war" -Credential $cred
+          
           # Deploy WAR to Tomcat
           Write-Host "Deploying to Tomcat..."
-          curl -u "${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASS }}" --upload-file "weather-app-$VERSION.war" "http://your-tomcat-host:5555/manager/text/deploy?path=/weather-app&update=true"
+          $tomcatCred = New-Object System.Management.Automation.PSCredential("***", (ConvertTo-SecureString "***" -AsPlainText -Force))
+          Invoke-WebRequest -Uri "http://localhost:5556/manager/text/deploy?path=/weather-app&update=true" -Method Put -InFile "weather-app-$VERSION.war" -Credential $tomcatCred
+
