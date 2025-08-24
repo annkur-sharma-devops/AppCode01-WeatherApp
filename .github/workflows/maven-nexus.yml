@@ -54,7 +54,7 @@ jobs:
             -Durl=http://localhost:8899/repository/maven-release-repo-weather-app/ `
             -Dusername=$env:NEXUS_USER `
             -Dpassword=$env:NEXUS_PASS
-        shell: pwsh
+        shell: powershell
         
       # (Optional) Deploy to Tomcat if reachable
       - name: Deploy WAR to Tomcat
