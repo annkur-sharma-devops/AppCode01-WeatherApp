@@ -84,7 +84,7 @@ jobs:
       - name: Upload WAR to JFrog
         env:
           JFROG_USER: ${{ secrets.JFROG_USER }}
-          JFROG_API_KEY1: ${{ secrets.JFROG_API_KEY1 }}
+          JFROG_API_KEY: ${{ secrets.JFROG_API_KEY }}
           DEPLOY_TYPE: release
         run: |
           $VERSION="1.1.${{ github.run_number }}"
@@ -100,7 +100,7 @@ jobs:
           $URL="https://annkursharma.jfrog.io/artifactory/$REPO/$ARTIFACT_PATH"
       
           Write-Host "Uploading to $URL using curl.exe with progress..."
-          curl.exe -u "$env:JFROG_USER:$env:JFROG_API_KEY1" -T "target/weather-app.war" "$URL" --progress-bar
+          curl.exe -u "$env:JFROG_USER:$env:JFROG_API_KEY" -T "target/weather-app.war" "$URL" --progress-bar
           Write-Host "Upload finished!"
         shell: powershell
 
