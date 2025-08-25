@@ -84,7 +84,7 @@ jobs:
       - name: Upload WAR to JFrog
         env:
           JFROG_USER: ${{ secrets.JFROG_USER }}
-          JFROG_API_KEY: ${{ secrets.JFROG_API_KEY1 }}
+          JFROG_API_KEY1: ${{ secrets.JFROG_API_KEY1 }}
           DEPLOY_TYPE: release
         run: |
           $VERSION="1.1.${{ github.run_number }}"
