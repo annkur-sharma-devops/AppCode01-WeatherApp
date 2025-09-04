@@ -18,17 +18,17 @@ pipeline {
             }
         }
 
+        stage('Build with Maven') {
+            steps {
+                bat 'mvn clean verify install'
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('MySonarQubeServer') {
                     bat 'sonar-scanner'
                 }
-            }
-        }
-
-        stage('Build with Maven') {
-            steps {
-                bat 'mvn clean verify install'
             }
         }
 
@@ -56,7 +56,7 @@ pipeline {
             steps {
                 bat """
                 set BUILD_NUM=${BUILD_NUMBER}
-                set ARTIFACT_URL=http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app/1.0.%BUILD_NUM%/weather-app-1.0.%BUILD_NUM%.war
+                set ARTIFACT_URL=http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app-1.2/1.2.%BUILD_NUM%/weather-app-1.2.%BUILD_NUM%.war
 
                 echo Downloading from Nexus: %ARTIFACT_URL%
                 curl -o %WORKSPACE%\\weather-app.war %ARTIFACT_URL%
