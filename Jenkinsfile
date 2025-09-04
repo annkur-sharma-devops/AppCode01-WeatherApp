@@ -56,8 +56,11 @@ pipeline {
                     ]]
                 )
             }
+        }
+
+        stage('Uploading to Nexus Repository') {
             steps {
-                bat 'echo Copying WAR to Nexus Repository'
+                bat 'echo Uploading WAR to Nexus Repository'
             }
         }
 
