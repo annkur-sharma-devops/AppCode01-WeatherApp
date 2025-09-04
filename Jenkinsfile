@@ -18,15 +18,15 @@ pipeline {
             }
         }
 
-        stage('Build with Maven') {
-            steps {
-                bat 'mvn clean verify install'
-            }
-        }
-
         stage('Test with Maven') {
             steps {
                 bat 'mvn clean test'
+            }
+        }
+
+        stage('Build with Maven') {
+            steps {
+                bat 'mvn clean verify install'
             }
         }
 
