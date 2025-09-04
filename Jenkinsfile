@@ -49,7 +49,7 @@ pipeline {
                     repository: 'maven-release-repo-weather-app',
                     credentialsId: 'nexus-credentials',
                     artifacts: [[
-                        artifactId: 'weather-app',
+                        artifactId: 'weather-app-1.2',
                         type: 'war',
                         classifier: '',
                         file: 'target/weather-app.war'
