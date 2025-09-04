@@ -45,7 +45,7 @@ pipeline {
                     protocol: 'http',
                     nexusUrl: 'localhost:8899',
                     groupId: 'com.example',
-                    version: "1.2.${BUILD_NUMBER}",
+                    version: "${BUILD_NUMBER}",
                     repository: 'maven-release-repo-weather-app',
                     credentialsId: 'nexus-credentials',
                     artifacts: [[
@@ -69,7 +69,7 @@ pipeline {
                 bat """
                 echo Copying WAR directly from Jenkins workspace
                 set BUILD_NUM=${BUILD_NUMBER}
-                set ARTIFACT_URL=http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app-1.2/1.2.%BUILD_NUM%/weather-app-%BUILD_NUM%.war
+                set ARTIFACT_URL=http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app-1.2/1.2.%BUILD_NUM%/weather-app-1.2.%BUILD_NUM%.war
 
                 echo Downloading from Nexus: %ARTIFACT_URL%
                 curl -o %WORKSPACE%\\weather-app.war %ARTIFACT_URL%
