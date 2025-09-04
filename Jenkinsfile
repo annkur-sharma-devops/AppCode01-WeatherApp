@@ -24,6 +24,12 @@ pipeline {
             }
         }
 
+        stage('Test with Maven') {
+            steps {
+                bat 'mvn clean test'
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('MySonarQubeServer') {
@@ -50,11 +56,15 @@ pipeline {
                     ]]
                 )
             }
+            steps {
+                bat 'echo Copying WAR to Nexus Repository'
+            }
         }
 
         stage('Deploy to Tomcat') {
             steps {
                 bat """
+                echo Copying WAR directly from Jenkins workspace
                 set BUILD_NUM=${BUILD_NUMBER}
                 set ARTIFACT_URL=http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app-1.2/1.2.%BUILD_NUM%/weather-app-1.2.%BUILD_NUM%.war
 
