@@ -39,11 +39,11 @@ pipeline {
                     protocol: 'http',
                     nexusUrl: 'localhost:8899',
                     groupId: 'com.example',
-                    version: "1.0.${BUILD_NUMBER}",
+                    version: "1.2.${BUILD_NUMBER}",
                     repository: 'maven-release-repo-weather-app',
                     credentialsId: 'nexus-credentials',
                     artifacts: [[
-                        artifactId: 'weather-app',
+                        artifactId: 'weather-app-1.2',
                         type: 'war',
                         classifier: '',
                         file: 'target/weather-app.war'
