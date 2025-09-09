@@ -84,7 +84,7 @@ jobs:
       - name: Upload WAR to JFrog
         shell: powershell
         run: |
-          $VERSION="1.1.37"
+          $VERSION="1.2"
           Write-Host "Uploading weather-app-$VERSION.war to JFrog"
       
           if ($env:DEPLOY_TYPE -eq "snapshot") {
