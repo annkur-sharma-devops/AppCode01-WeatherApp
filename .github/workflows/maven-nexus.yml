@@ -102,6 +102,6 @@ jobs:
           Copy-Item "target/weather-app.war" "target/weather-app-$VERSION.war"
       
           Write-Host "Uploading to $URL"
-          curl.exe -u "$env:JFROG_USER:$env:JFROG_API_KEY" -T "target/weather-app-$VERSION.war" "$URL" --progress-bar
+          curl.exe -u "$env:JFROG_USER:$env:JFROG_PASS" -T "target/weather-app-$VERSION.war" "$URL" --progress-bar
 
 
