@@ -80,28 +80,38 @@ jobs:
       #     Invoke-WebRequest -Uri "http://localhost:5556/manager/text/deploy?path=/weather-app&update=true" -Method Put -InFile "weather-app-1.1-$VERSION.war" -Credential $tomcatCred
       #   shell: powershell
 
-      # (Optional) Deploy to JFrog
-      - name: Upload WAR and POM to JFrog
-        shell: powershell
-        run: |
-          $VERSION="1.2"
-          $REPO="libs-release-local"  # change if snapshot
-          $GROUP_PATH="com/example/weather-app"
+      # # (Optional) Deploy to JFrog
+      # - name: Upload WAR and POM to JFrog
+      #   shell: powershell
+      #   run: |
+      #     $VERSION="1.2"
+      #     $REPO="libs-release-local"  # change if snapshot
+      #     $GROUP_PATH="com/example/weather-app"
           
-          $WAR_PATH="target/weather-app-$VERSION.war"
-          $POM_PATH="target/weather-app-$VERSION.pom"
+      #     $WAR_PATH="target/weather-app-$VERSION.war"
+      #     $POM_PATH="target/weather-app-$VERSION.pom"
 
-          # Copy WAR and POM to versioned names
-          Copy-Item "target/weather-app.war" $WAR_PATH
-          Copy-Item "pom.xml" $POM_PATH
+      #     # Copy WAR and POM to versioned names
+      #     Copy-Item "target/weather-app.war" $WAR_PATH
+      #     Copy-Item "pom.xml" $POM_PATH
 
-          $WAR_URL="http://localhost:8081/artifactory/$REPO/$GROUP_PATH/$VERSION/weather-app-$VERSION.war"
-          $POM_URL="http://localhost:8081/artifactory/$REPO/$GROUP_PATH/$VERSION/weather-app-$VERSION.pom"
+      #     $WAR_URL="http://localhost:8081/artifactory/$REPO/$GROUP_PATH/$VERSION/weather-app-$VERSION.war"
+      #     $POM_URL="http://localhost:8081/artifactory/$REPO/$GROUP_PATH/$VERSION/weather-app-$VERSION.pom"
 
-          Write-Host "Uploading WAR to $WAR_URL"
-          curl.exe -u "$env:JFROG_USER:$env:JFROG_API_KEY1" -T $WAR_PATH $WAR_URL --progress-bar
+      #     Write-Host "Uploading WAR to $WAR_URL"
+      #     curl.exe -u "$env:JFROG_USER:$env:JFROG_API_KEY1" -T $WAR_PATH $WAR_URL --progress-bar
 
-          Write-Host "Uploading POM to $POM_URL"
-          curl.exe -u "$env:JFROG_USER:$env:JFROG_API_KEY1" -T $POM_PATH $POM_URL --progress-bar
+      #     Write-Host "Uploading POM to $POM_URL"
+      #     curl.exe -u "$env:JFROG_USER:$env:JFROG_API_KEY1" -T $POM_PATH $POM_URL --progress-bar
 
 
+      # 3️⃣ Deploy to JFrog Artifactory using Maven
+      - name: Deploy to JFrog
+        env:
+          JFROG_USER: ${{ secrets.JFROG_USER }}
+          JFROG_API_KEY: ${{ secrets.JFROG_API_KEY1 }}
+        run: |
+          Write-Host "Deploying weather-app to Artifactory"
+          mvn deploy -B -DskipTests \
+              -Dusername=$env:JFROG_USER \
+              -Dpassword=$env:JFROG_API_KEY
