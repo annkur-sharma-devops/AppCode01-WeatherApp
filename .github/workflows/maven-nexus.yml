@@ -112,6 +112,4 @@ jobs:
           JFROG_API_KEY: ${{ secrets.JFROG_API_KEY1 }}
         run: |
           Write-Host "Deploying weather-app to Artifactory"
-          mvn deploy -B -DskipTests \
-              -Dusername=$env:JFROG_USER \
-              -Dpassword=$env:JFROG_API_KEY
+          mvn deploy -B -DskipTests -Dusername=$env:JFROG_USER -Dpassword=$env:JFROG_API_KEY
