@@ -107,6 +107,7 @@ jobs:
 
       # 3️⃣ Deploy to JFrog Artifactory using Maven
       - name: Deploy to JFrog
+        shell: powershell
         env:
           JFROG_USER: ${{ secrets.JFROG_USER }}
           JFROG_API_KEY: ${{ secrets.JFROG_API_KEY1 }}
