@@ -113,4 +113,4 @@ jobs:
           JFROG_API_KEY: ${{ secrets.JFROG_API_KEY1 }}
         run: |
           Write-Host "Deploying weather-app to Artifactory"
-          mvn deploy -B -DskipTests -DaltDeploymentRepository=jfrog-release::default::http://localhost:8081/artifactory/libs-release-local  -Dusername=$env:JFROG_USER -Dpassword=$env:JFROG_API_KEY
+          mvn deploy -X -DskipTests -DaltDeploymentRepository=jfrog-release::default::http://localhost:8081/artifactory/libs-release-local  -Dusername=$env:JFROG_USER -Dpassword=$env:JFROG_API_KEY
