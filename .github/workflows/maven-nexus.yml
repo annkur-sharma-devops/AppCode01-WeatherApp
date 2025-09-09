@@ -88,15 +88,15 @@ jobs:
           Write-Host "Uploading weather-app-$VERSION.war to JFrog"
       
           if ($env:DEPLOY_TYPE -eq "snapshot") {
-              $REPO="maven-snapshot-local"
+              $REPO="libs-snapshot-local"
           } else {
-              $REPO="maven-releases-local"
+              $REPO="libs-release-local"
           }
       
           # Maven-style path: groupId=com.example, artifactId=weather-app
           $GROUP_PATH="com/example/weather-app"
           $ARTIFACT_PATH="$GROUP_PATH/$VERSION/weather-app-$VERSION.war"
-          $URL="https://annkursharma.jfrog.io/artifactory/$REPO/$ARTIFACT_PATH"
+          $URL="http://localhost:8082/artifactory/$REPO/$ARTIFACT_PATH"
       
           # Rename WAR to match
           Copy-Item "target/weather-app.war" "target/weather-app-$VERSION.war"
