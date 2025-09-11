@@ -150,4 +150,5 @@ public class WeatherServiceTest {
         String result = (String) urlMethod.invoke(null, "http://example.com");
         assertEquals("http://example.com", result);
     }
+
 }

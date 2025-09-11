@@ -138,7 +138,7 @@ public class WeatherDataTest {
         assertEquals("theme-rain", data.getTheme()); // rain wins
     }
 
-        @Test
+    @Test
     public void testExtremeValues() {
         WeatherData data = new WeatherData();
 
