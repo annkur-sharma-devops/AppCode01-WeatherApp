@@ -42,7 +42,7 @@ jobs:
           mvn deploy:deploy-file `
             "-DgroupId=com.example" `
             "-DartifactId=weather-app" `
-            "-Dversion=$BUILD_VERSION" `
+            "-Dversion=$env:BUILD_VERSION" `
             "-Dpackaging=war" `
             "-Dfile=target/weather-app.war" `
             "-DrepositoryId=maven-release-repo-weather-app" `
@@ -73,7 +73,7 @@ jobs:
           Write-Host "Downloading version $BUILD_VERSION"
 
           # Correct Nexus artifact URL for artifactId weather-app
-          $ARTIFACT_URL = "http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app/$BUILD_VERSION/weather-app-$BUILD_VERSION.war"
+          $ARTIFACT_URL = "http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app/$env:BUILD_VERSION/weather-app-$env:BUILD_VERSION.war"
           Write-Host "Downloading from Nexus: $ARTIFACT_URL"
 
           # Create Nexus credential
@@ -81,12 +81,12 @@ jobs:
           $cred = New-Object System.Management.Automation.PSCredential($env:NEXUS_USER, $securePassword)
 
           # Download the WAR
-          Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile "weather-app1-$BUILD_VERSION.war" -Credential $cred
+          Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile "weather-app1-$env:BUILD_VERSION.war" -Credential $cred
 
           # Deploy WAR to Tomcat
           Write-Host "Deploying to Tomcat..."
           $tomcatCred = New-Object System.Management.Automation.PSCredential($env:TOMCAT_USER, (ConvertTo-SecureString $env:TOMCAT_PASS -AsPlainText -Force))
-          Invoke-WebRequest -Uri "http://localhost:5556/manager/text/deploy?path=/weather-app1&update=true" -Method Put -InFile "weather-app1-$BUILD_VERSION.war" -Credential $tomcatCred
+          Invoke-WebRequest -Uri "http://localhost:5556/manager/text/deploy?path=/weather-app1&update=true" -Method Put -InFile "weather-app1-$env:BUILD_VERSION.war" -Credential $tomcatCred
         shell: powershell
 
       # # (Optional) Deploy to JFrog
