@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  BUILD_VERSION: "1.3.${{ github.run_number }}"
+
 jobs:
   Build-Deploy:
     runs-on: self-hosted
@@ -33,7 +36,7 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
         run: |
-          $VERSION = "1.3.${{ github.run_number }}"
+          $VERSION = ${{env.BUILD_VERSION }}
           Write-Host "Deploying version $VERSION"
       
           # Use double quotes for proper expansion
@@ -49,13 +52,17 @@ jobs:
             "-Dpassword=$env:NEXUS_PASS"
         shell: powershell
       
-      - run: mkdir -p application-artifact
-      - name: Upload artifacts
+      - name: Prepare artifact directory
+        run: |
+          mkdir -p application-artifact
+          cp target/*.war application-artifact/
+
+      - name: Upload artifact
         env:
-          VERSION: "1.3.${{ github.run_number }}"
+          $VERSION: ${{env.BUILD_VERSION }}
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: weather-app1-$VERSION.war
+          name: weather-app1-${{ env.VERSION }}.war
           path: application-artifact
     
       # (Optional) Deploy to Tomcat if reachable
@@ -66,7 +73,7 @@ jobs:
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
           TOMCAT_PASS: ${{ secrets.TOMCAT_PASS }}
         run: |
-          $VERSION = "1.3.${{ github.run_number }}"
+          $VERSION = ${{env.BUILD_VERSION }}
           Write-Host "Downloading version $VERSION"
 
           # Correct Nexus artifact URL for artifactId weather-app
