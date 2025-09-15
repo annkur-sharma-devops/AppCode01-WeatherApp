@@ -61,6 +61,12 @@ jobs:
         with:
           name: weather-app1-${{ env.BUILD_VERSION }}.war
           path: application-artifact
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: weather-app1.war
+          path: application-artifact
     
       # (Optional) Deploy to Tomcat if reachable
       - name: Deploy WAR to Tomcat
