@@ -25,7 +25,7 @@ jobs:
       # Run SonarQube analysis
       - name: SonarQube Scan
         run: |
-          sonar-scanner `
+          sonar-scanner
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
@@ -36,8 +36,7 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
         run: |
-          $VERSION = ${{ env.BUILD_VERSION }}
-          Write-Host "Deploying version $VERSION"
+          Write-Host "Deploying version $BUILD_VERSION"
       
           # Use double quotes for proper expansion
           mvn deploy:deploy-file `
@@ -58,11 +57,9 @@ jobs:
           cp target/*.war application-artifact/
 
       - name: Upload artifact
-        env:
-          VERSION: ${{ env.BUILD_VERSION }}
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: weather-app1-${{ env.VERSION }}.war
+          name: weather-app1-${{ env.BUILD_VERSION }}.war
           path: application-artifact
     
       # (Optional) Deploy to Tomcat if reachable
@@ -73,11 +70,10 @@ jobs:
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
           TOMCAT_PASS: ${{ secrets.TOMCAT_PASS }}
         run: |
-          $VERSION = ${{env.BUILD_VERSION }}
-          Write-Host "Downloading version $VERSION"
+          Write-Host "Downloading version $BUILD_VERSION"
 
           # Correct Nexus artifact URL for artifactId weather-app
-          $ARTIFACT_URL = "http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app/$VERSION/weather-app-$VERSION.war"
+          $ARTIFACT_URL = "http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app/$BUILD_VERSION/weather-app-$BUILD_VERSION.war"
           Write-Host "Downloading from Nexus: $ARTIFACT_URL"
 
           # Create Nexus credential
@@ -85,12 +81,12 @@ jobs:
           $cred = New-Object System.Management.Automation.PSCredential($env:NEXUS_USER, $securePassword)
 
           # Download the WAR
-          Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile "weather-app1-$VERSION.war" -Credential $cred
+          Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile "weather-app1-$BUILD_VERSION.war" -Credential $cred
 
           # Deploy WAR to Tomcat
           Write-Host "Deploying to Tomcat..."
           $tomcatCred = New-Object System.Management.Automation.PSCredential($env:TOMCAT_USER, (ConvertTo-SecureString $env:TOMCAT_PASS -AsPlainText -Force))
-          Invoke-WebRequest -Uri "http://localhost:5556/manager/text/deploy?path=/weather-app1&update=true" -Method Put -InFile "weather-app1-$VERSION.war" -Credential $tomcatCred
+          Invoke-WebRequest -Uri "http://localhost:5556/manager/text/deploy?path=/weather-app1&update=true" -Method Put -InFile "weather-app1-$BUILD_VERSION.war" -Credential $tomcatCred
         shell: powershell
 
       # # (Optional) Deploy to JFrog
