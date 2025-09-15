@@ -23,9 +23,6 @@ jobs:
       - name: SonarQube Scan
         run: |
           sonar-scanner `
-        #    "-Dsonar.projectKey=weather-app" `
-        #    "-Dsonar.host.url=http://localhost:9000" `
-        #    "-Dsonar.login=$SONAR_TOKEN"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
@@ -51,7 +48,16 @@ jobs:
             "-Dusername=$env:NEXUS_USER" `
             "-Dpassword=$env:NEXUS_PASS"
         shell: powershell
-        
+      
+      - run: mkdir -p application-artifact
+      - name: Upload artifacts
+        env:
+          VERSION: "1.3.${{ github.run_number }}"
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: weather-app1-$VERSION.war
+          path: application-artifact
+    
       # (Optional) Deploy to Tomcat if reachable
       - name: Deploy WAR to Tomcat
         env:
