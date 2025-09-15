@@ -36,7 +36,7 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
         run: |
-          $VERSION = ${{env.BUILD_VERSION }}
+          $VERSION = ${{ env.BUILD_VERSION }}
           Write-Host "Deploying version $VERSION"
       
           # Use double quotes for proper expansion
@@ -59,7 +59,7 @@ jobs:
 
       - name: Upload artifact
         env:
-          $VERSION: ${{env.BUILD_VERSION }}
+          VERSION: ${{ env.BUILD_VERSION }}
         uses: actions/upload-artifact@v4.6.2
         with:
           name: weather-app1-${{ env.VERSION }}.war
