@@ -42,7 +42,7 @@ jobs:
           mvn deploy:deploy-file `
             "-DgroupId=com.example" `
             "-DartifactId=weather-app" `
-            "-Dversion=$VERSION" `
+            "-Dversion=$BUILD_VERSION" `
             "-Dpackaging=war" `
             "-Dfile=target/weather-app.war" `
             "-DrepositoryId=maven-release-repo-weather-app" `
