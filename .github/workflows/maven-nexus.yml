@@ -169,23 +169,43 @@ jobs:
       run: |
         # Start port-forward in a background job
         $job = Start-Job {
-          kubectl port-forward svc/argocd-server -n argocd 8081:443
+            kubectl port-forward svc/argocd-server -n argocd 8081:443
         }
-
+        
         # Wait until the port is open
+        Write-Host "Waiting for ArgoCD port-forward to be ready..."
         do {
-            Start-Sleep -Seconds 1
+            Start-Sleep -Seconds 2
         } until ((Test-NetConnection -ComputerName 127.0.0.1 -Port 8081).TcpTestSucceeded)
         
-        # Login to ArgoCD
-        argocd login $env:ARGOCD_SERVER --username admin --password $env:ARGOCD_PASSWORD --grpc-web --insecure
+        # Retry login up to 5 times
+        $loginSuccess = $false
+        for ($i=1; $i -le 5; $i++) {
+            try {
+                argocd login $env:ARGOCD_SERVER --username admin --password $env:ARGOCD_PASSWORD --grpc-web --insecure
+                $loginSuccess = $true
+                Write-Host "ArgoCD login successful!"
+                break
+            } catch {
+                Write-Host "Login attempt $i failed, retrying in 5 seconds..."
+                Start-Sleep -Seconds 5
+            }
+        }
+        
+        if (-not $loginSuccess) {
+            Write-Error "ArgoCD login failed after 5 attempts. Exiting."
+            Stop-Job $job
+            Remove-Job $job
+            exit 1
+        }
         
         # Sync the app
         argocd app sync myapp --grpc-web --server $env:ARGOCD_SERVER --insecure
         
-        # Optionally stop the port-forward job after sync
+        # Stop and remove the port-forward job
         Stop-Job $job
         Remove-Job $job
+        Write-Host "Port-forward job stopped and removed."
       shell: powershell
           
 
