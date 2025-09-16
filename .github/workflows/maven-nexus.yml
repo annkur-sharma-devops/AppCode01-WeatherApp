@@ -152,16 +152,18 @@ jobs:
         python -c "import pathlib; f=pathlib.Path('k8s/deployment.yaml'); f.write_text(f.read_text().replace('image:', 'image: srbobl071746acr.azurecr.io/myapp:${{ env.BUILD_VERSION }}'))"
         
     # ArgoCD Sync
-    - name: Deploy via ArgoCD
-      env:
-        ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
-      shell: powershell
+    - name: ArgoCD Login
       run: |
-        # Sync the app to latest image version
-        argocd app sync myapp `
-          --grpc-web `
-          --server $env:ARGOCD_SERVER `
-          --username admin `
-          --password ${{ secrets.ARGOCD_PASSWORD }} `
+        argocd login ${{ env.ARGOCD_SERVER }} \
+          --username admin \
+          --password ${{ secrets.ARGOCD_PASSWORD }} \
+          --grpc-web \
           --insecure
-
+    
+    - name: Sync App with ArgoCD
+      run: |
+        argocd app sync myapp \
+          --grpc-web \
+          --server ${{ env.ARGOCD_SERVER }} \
+          --insecure
+          
