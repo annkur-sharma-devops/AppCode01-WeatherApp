@@ -19,3 +19,6 @@ spec:
         image: srbobl071746acr.azurecr.io/myapp:latest   # <-- updated by pipeline
         ports:
         - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: weather-secrets   # <-- matches the kubectl secret name
