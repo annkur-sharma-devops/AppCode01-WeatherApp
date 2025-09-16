@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: weather-app
-        image: pbicux013946acr.azurecr.io/myapp:latest   # <-- updated by pipeline
+        image: srbobl071746acr.azurecr.io/myapp:latest   # <-- updated by pipeline
         ports:
         - containerPort: 8080
