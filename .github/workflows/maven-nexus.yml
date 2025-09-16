@@ -8,7 +8,7 @@ on:
 
 env:
   BUILD_VERSION: "1.3.${{ github.run_number }}"
-  ARGOCD_SERVER: "172.189.156.142:30443"
+  ARGOCD_SERVER: "https://localhost:8081"
   
 jobs:
   Continuous-Integration:
@@ -152,11 +152,34 @@ jobs:
         python -c "import pathlib; f=pathlib.Path('k8s/deployment.yaml'); f.write_text(f.read_text().replace('image:', 'image: srbobl071746acr.azurecr.io/myapp:${{ env.BUILD_VERSION }}'))"
         
     # ArgoCD Sync
-    - name: ArgoCD Sync app
-      run: |
-        argocd app sync myapp `
-          --grpc-web `
-          --server ${{ env.ARGOCD_SERVER }} `
-          --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} `
-          --insecure
+    # - name: ArgoCD Sync app
+    #   run: |
+    #     argocd app sync myapp `
+    #       --grpc-web `
+    #       --server ${{ env.ARGOCD_SERVER }} `
+    #       --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} `
+    #       --insecure
           
+    - name: Set environment variables
+      run: |
+        $env:BUILD_VERSION = "1.3.${{ github.run_number }}"
+        $env:ARGOCD_SERVER = 'https://localhost:8081'
+      shell: powershell
+
+    - name: Start port-forward to ArgoCD (background)
+      run: |
+        # Start port-forward in background
+        Start-Process -NoNewWindow -FilePath kubectl -ArgumentList "port-forward svc/argocd-server -n argocd 8081:443"
+        # Wait a few seconds for port-forward to be ready
+        Start-Sleep -Seconds 5
+      shell: powershell
+
+    - name: ArgoCD login
+      run: |
+        argocd login $env:ARGOCD_SERVER --username admin --password ${{ secrets.ARGOCD_ADMIN_PASSWORD }} --grpc-web --insecure
+      shell: powershell
+
+    - name: Sync app via ArgoCD
+      run: |
+        argocd app sync myapp --grpc-web --server $env:ARGOCD_SERVER --insecure
+      shell: powershell
