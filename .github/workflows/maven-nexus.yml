@@ -156,7 +156,7 @@ jobs:
       run: |
         argocd app sync myapp `
           --grpc-web `
-          --server $ARGOCD_SERVER `
+          --server ${{ env.ARGOCD_SERVER }} `
           --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} `
           --insecure
           
