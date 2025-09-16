@@ -169,9 +169,10 @@ jobs:
     - name: Start port-forward to ArgoCD (background)
       run: |
         # Start port-forward in background
-        kubectl port-forward svc/argocd-server -n argocd 8081:443
+        Start-Process -NoNewWindow -FilePath kubectl -ArgumentList "port-forward svc/argocd-server -n argocd 8081:443"
+        # kubectl port-forward svc/argocd-server -n argocd 8081:443
         # Wait a few seconds for port-forward to be ready
-        # Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 5
       shell: powershell
 
     - name: ArgoCD login
