@@ -114,13 +114,13 @@ jobs:
       run: |
         docker build \
           --build-arg BUILD_VERSION=${{ env.BUILD_VERSION }} \
-          -t pbicux013946ACR.azurecr.io/myapp:${{ env.BUILD_VERSION }} .
-        docker push pbicux013946ACR.azurecr.io/myapp:${{ env.BUILD_VERSION }}
+          -t srbobl071746acr.azurecr.io/myapp:${{ env.BUILD_VERSION }} .
+        docker push srbobl071746acr.azurecr.io/myapp:${{ env.BUILD_VERSION }}
     
     # Update K8s manifest (patch image tag)
     - name: Update Kubernetes manifest
       run: |
-        sed -i "s|image:.*|image: pbicux013946acr.azurecr.io/myapp:${{ env.BUILD_VERSION }}|" k8s/deployment.yaml
+        sed -i "s|image:.*|image: srbobl071746acr.azurecr.io/myapp:${{ env.BUILD_VERSION }}|" k8s/deployment.yaml
 
     # ArgoCD Sync
     - name: Deploy via ArgoCD
