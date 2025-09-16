@@ -148,11 +148,11 @@ jobs:
     # ArgoCD Sync
     - name: Deploy via ArgoCD
       env:
-        ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
         ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+      shell: pwsh
       run: |
         # Sync the app to latest image version
         argocd app sync myapp `
           --grpc-web `
-          --server $ARGOCD_SERVER `
-          --auth-token $ARGOCD_AUTH_TOKEN
+          --server $env:ARGOCD_SERVER `
+          --auth-token $env:ARGOCD_AUTH_TOKEN
