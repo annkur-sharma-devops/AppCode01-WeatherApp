@@ -8,7 +8,7 @@ on:
 
 env:
   BUILD_VERSION: "1.3.${{ github.run_number }}"
-  ARGOCD_SERVER: "https://localhost:8080"
+  ARGOCD_SERVER: "localhost:8080"
   
 jobs:
   Continuous-Integration:
