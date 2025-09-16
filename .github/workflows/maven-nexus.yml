@@ -149,7 +149,7 @@ jobs:
     - name: Deploy via ArgoCD
       env:
         ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
-      shell: pwsh
+      shell: powershell
       run: |
         # Sync the app to latest image version
         argocd app sync myapp `
