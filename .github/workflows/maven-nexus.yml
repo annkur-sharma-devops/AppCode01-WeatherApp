@@ -138,6 +138,12 @@ jobs:
     - name: Push Docker Image
       run: |
         docker push srbobl071746acr.azurecr.io/myapp:${{ env.BUILD_VERSION }}
+
+    - name: Create/Update Kubernetes Secret
+      run: |
+        kubectl create secret generic weather-secrets `
+          --from-literal=OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }} `
+          --dry-run=client -o yaml | kubectl apply -f -
     
     # Update K8s manifest (patch image tag)
     # Automatically update the container image tag in the manifest to match the build version
