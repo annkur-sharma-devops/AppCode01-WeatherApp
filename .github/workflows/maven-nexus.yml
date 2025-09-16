@@ -178,7 +178,7 @@ jobs:
         } until ((Test-NetConnection -ComputerName 127.0.0.1 -Port 8081).TcpTestSucceeded)
         
         # Login to ArgoCD
-        argocd login $env:ARGOCD_SERVER --username admin --password $env:ADMIN_PASSWORD --grpc-web --insecure
+        argocd login $env:ARGOCD_SERVER --username admin --password $env:ARGOCD_PASSWORD --grpc-web --insecure
         
         # Sync the app
         argocd app sync myapp --grpc-web --server $env:ARGOCD_SERVER --insecure
