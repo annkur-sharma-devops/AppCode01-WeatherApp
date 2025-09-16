@@ -8,7 +8,7 @@ on:
 
 env:
   BUILD_VERSION: "1.3.${{ github.run_number }}"
-  ARGOCD_SERVER: "localhost:8080"
+  ARGOCD_SERVER: "localhost:8081"
   
 jobs:
   Continuous-Integration:
@@ -150,7 +150,7 @@ jobs:
     - name: Update Kubernetes manifest
       run: |
         python -c "import pathlib; f=pathlib.Path('k8s/deployment.yaml'); f.write_text(f.read_text().replace('image:', 'image: srbobl071746acr.azurecr.io/myapp:${{ env.BUILD_VERSION }}'))"
-
+        
     # ArgoCD Sync
     - name: Deploy via ArgoCD
       env:
