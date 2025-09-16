@@ -161,6 +161,7 @@ jobs:
         argocd app sync myapp `
           --grpc-web `
           --server $env:ARGOCD_SERVER `
-          --auth-token $env:ARGOCD_AUTH_TOKEN `
+          --username admin `
+          --password ${{ secrets.ARGOCD_PASSWORD }} `
           --insecure
 
