@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: weather-app
-        image: zalaro023936acr.azurecr.io/myapp:1.3.121   # <-- updated by pipeline
+        image: zalaro023936acr.azurecr.io/myapp:1.3.122   # <-- updated by pipeline
         ports:
         - containerPort: 8080
         envFrom:
