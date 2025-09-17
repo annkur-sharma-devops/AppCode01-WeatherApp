@@ -10,6 +10,7 @@ on:
 env:
   BUILD_VERSION: "1.3.${{ github.run_number }}"
   ARGOCD_SERVER: "127.0.0.1:8081"
+  ACR_PATH: "zalaro023936acr.azurecr.io"
   
 jobs:
   Continuous-Integration:
@@ -126,7 +127,7 @@ jobs:
     - name: Azure Container Registry Login
       uses: azure/docker-login@v2
       with:
-        login-server: srbobl071746acr.azurecr.io
+        login-server: ${{ ACR_PATH }}
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
    
@@ -134,11 +135,11 @@ jobs:
       run: |
         docker build `
           --build-arg BUILD_VERSION=${{ env.BUILD_VERSION }} `
-          -t srbobl071746acr.azurecr.io/myapp:${{ env.BUILD_VERSION }} .
+          -t ${{ ACR_PATH }}/myapp:${{ env.BUILD_VERSION }} .
 
     - name: Push Docker Image
       run: |
-        docker push srbobl071746acr.azurecr.io/myapp:${{ env.BUILD_VERSION }}
+        docker push ${{ ACR_PATH }}/myapp:${{ env.BUILD_VERSION }}
 
     - name: Create/Update Kubernetes Secret
       run: |
@@ -150,82 +151,82 @@ jobs:
     # Automatically update the container image tag in the manifest to match the build version
     - name: Update Kubernetes manifest
       run: |
-        python -c "import pathlib; f=pathlib.Path('k8s/deployment.yaml'); f.write_text(f.read_text().replace('image:', 'image: srbobl071746acr.azurecr.io/myapp:${{ env.BUILD_VERSION }}'))"
+        python -c "import pathlib; f=pathlib.Path('k8s/deployment.yaml'); f.write_text(f.read_text().replace('image:', 'image: ${{ ACR_PATH }}/myapp:${{ env.BUILD_VERSION }}'))"
         
-    # ArgoCD Sync
-    # - name: ArgoCD Sync app
+    # # ArgoCD Sync
+    # # - name: ArgoCD Sync app
+    # #   run: |
+    # #     argocd app sync myapp `
+    # #       --grpc-web `
+    # #       --server ${{ env.ARGOCD_SERVER }} `
+    # #       --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} `
+    # #       --insecure
+    # - name: Set environment variables
     #   run: |
-    #     argocd app sync myapp `
-    #       --grpc-web `
-    #       --server ${{ env.ARGOCD_SERVER }} `
-    #       --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} `
-    #       --insecure
-    - name: Set environment variables
-      run: |
-        $env:BUILD_VERSION = "1.3.${{ github.run_number }}"
-        $env:ARGOCD_SERVER = '127.0.0.1:8081'
-      shell: powershell
+    #     $env:BUILD_VERSION = "1.3.${{ github.run_number }}"
+    #     $env:ARGOCD_SERVER = '127.0.0.1:8081'
+    #   shell: powershell
       
-    - name: Sync app via ArgoCD
-      run: |
-        # Start port-forward in a background job
-        $job = Start-Job {
-            kubectl port-forward svc/argocd-server -n argocd 8081:443
-        }
+    # - name: Sync app via ArgoCD
+    #   run: |
+    #     # Start port-forward in a background job
+    #     $job = Start-Job {
+    #         kubectl port-forward svc/argocd-server -n argocd 8081:443
+    #     }
         
-        # Wait until the port is open
-        Write-Host "Waiting for ArgoCD port-forward to be ready..."
-        do {
-            Start-Sleep -Seconds 2
-        } until ((Test-NetConnection -ComputerName 127.0.0.1 -Port 8081).TcpTestSucceeded)
+    #     # Wait until the port is open
+    #     Write-Host "Waiting for ArgoCD port-forward to be ready..."
+    #     do {
+    #         Start-Sleep -Seconds 2
+    #     } until ((Test-NetConnection -ComputerName 127.0.0.1 -Port 8081).TcpTestSucceeded)
         
-        # Retry login up to 5 times
-        $loginSuccess = $false
-        for ($i=1; $i -le 5; $i++) {
-            try {
-                argocd login $env:ARGOCD_SERVER --username admin --password $env:ARGOCD_PASSWORD --grpc-web --insecure
-                $loginSuccess = $true
-                Write-Host "ArgoCD login successful!"
-                break
-            } catch {
-                Write-Host "Login attempt $i failed, retrying in 5 seconds..."
-                Start-Sleep -Seconds 5
-            }
-        }
+    #     # Retry login up to 5 times
+    #     $loginSuccess = $false
+    #     for ($i=1; $i -le 5; $i++) {
+    #         try {
+    #             argocd login $env:ARGOCD_SERVER --username admin --password $env:ARGOCD_PASSWORD --grpc-web --insecure
+    #             $loginSuccess = $true
+    #             Write-Host "ArgoCD login successful!"
+    #             break
+    #         } catch {
+    #             Write-Host "Login attempt $i failed, retrying in 5 seconds..."
+    #             Start-Sleep -Seconds 5
+    #         }
+    #     }
         
-        if (-not $loginSuccess) {
-            Write-Error "ArgoCD login failed after 5 attempts. Exiting."
-            Stop-Job $job
-            Remove-Job $job
-            exit 1
-        }
+    #     if (-not $loginSuccess) {
+    #         Write-Error "ArgoCD login failed after 5 attempts. Exiting."
+    #         Stop-Job $job
+    #         Remove-Job $job
+    #         exit 1
+    #     }
         
-        # Sync the app
-        argocd app sync myapp --grpc-web --server $env:ARGOCD_SERVER --insecure
+    #     # Sync the app
+    #     argocd app sync myapp --grpc-web --server $env:ARGOCD_SERVER --insecure
         
-        # Stop and remove the port-forward job
-        Stop-Job $job
-        Remove-Job $job
-        Write-Host "Port-forward job stopped and removed."
-      shell: powershell
+    #     # Stop and remove the port-forward job
+    #     Stop-Job $job
+    #     Remove-Job $job
+    #     Write-Host "Port-forward job stopped and removed."
+    #   shell: powershell
           
 
 
-    # - name: Start port-forward to ArgoCD (background)
-    #   run: |
-    #     # Start port-forward in background
-    #     Start-Process -NoNewWindow -FilePath kubectl -ArgumentList "port-forward svc/argocd-server -n argocd 8081:443"
-    #     # kubectl port-forward svc/argocd-server -n argocd 8081:443
-    #     # Wait a few seconds for port-forward to be ready
-    #     Start-Sleep -Seconds 30
-    #   shell: powershell
+    # # - name: Start port-forward to ArgoCD (background)
+    # #   run: |
+    # #     # Start port-forward in background
+    # #     Start-Process -NoNewWindow -FilePath kubectl -ArgumentList "port-forward svc/argocd-server -n argocd 8081:443"
+    # #     # kubectl port-forward svc/argocd-server -n argocd 8081:443
+    # #     # Wait a few seconds for port-forward to be ready
+    # #     Start-Sleep -Seconds 30
+    # #   shell: powershell
 
-    # - name: ArgoCD login
-    #   run: |
-    #     argocd login $env:ARGOCD_SERVER --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --grpc-web --insecure
-    #   shell: powershell
+    # # - name: ArgoCD login
+    # #   run: |
+    # #     argocd login $env:ARGOCD_SERVER --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --grpc-web --insecure
+    # #   shell: powershell
 
-    # - name: Sync app via ArgoCD
-    #   run: |
-    #     argocd app sync myapp --grpc-web --server $env:ARGOCD_SERVER --insecure
-    #   shell: powershell
+    # # - name: Sync app via ArgoCD
+    # #   run: |
+    # #     argocd app sync myapp --grpc-web --server $env:ARGOCD_SERVER --insecure
+    # #   shell: powershell
