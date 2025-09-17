@@ -130,7 +130,7 @@ jobs:
     - name: Azure Container Registry Login
       uses: azure/docker-login@v2
       with:
-        login-server: ${{ ACR_PATH }}
+        login-server: $env:ACR_PATH
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
    
@@ -138,11 +138,11 @@ jobs:
       run: |
         docker build `
           --build-arg BUILD_VERSION=${{ env.BUILD_VERSION }} `
-          -t ${{ ACR_PATH }}/myapp:${{ env.BUILD_VERSION }} .
+          -t $env:ACR_PATH/myapp:${{ env.BUILD_VERSION }} .
 
     - name: Push Docker Image
       run: |
-        docker push ${{ ACR_PATH }}/myapp:${{ env.BUILD_VERSION }}
+        docker push $env:ACR_PATH/myapp:${{ env.BUILD_VERSION }}
 
     - name: Create/Update Kubernetes Secret
       run: |
