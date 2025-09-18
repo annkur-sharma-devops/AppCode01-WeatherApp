@@ -10,7 +10,7 @@ on:
 env:
   BUILD_VERSION: "1.3.${{ github.run_number }}"
   ARGOCD_SERVER: "127.0.0.1:8081"
-  ACR_PATH: "tunhav040029acr.azurecr.io"
+  ACR_PATH: "elpjfi080002acr.azurecr.io"
 
 permissions:
   contents: write
