@@ -22,3 +22,4 @@ spec:
   - hosts:
     - argocd.annkursharma.co.in
     secretName: argocd-server-tls
+
