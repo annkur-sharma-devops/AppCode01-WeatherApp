@@ -109,7 +109,7 @@ jobs:
       - name: Notify Deployment Repo (optional)
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.PAT_DEPLOY_REPO }}   # personal access token
+          token: ${{ secrets.PAT_DEPLOY_REPO_CLASSIC_TOKEN }}   # personal access token
           repository: annkur-sharma-devops/AppCode01-WeatherApp-K8s
           event-type: new-image-built
           client-payload: '{"build_version": "${{ env.BUILD_VERSION }}"}'
