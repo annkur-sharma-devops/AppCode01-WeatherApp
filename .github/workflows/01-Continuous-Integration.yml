@@ -106,12 +106,13 @@ jobs:
           docker push $env:ACR_PATH/myapp:${{ env.BUILD_VERSION }}
 
 
-      - name: Manual Approval
-        uses: hmarr/auto-approve-action@v2
+      - name: Notify Deployment Repo (optional)
+        uses: peter-evans/repository-dispatch@v3
         with:
-          # This step will pause the workflow and require manual approval
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          timeout-minutes: 1440
+          token: ${{ secrets.PAT_DEPLOY_REPO }}   # personal access token
+          repository: annkur-sharma-devops/AppCode01-WeatherApp-K8s
+          event-type: new-image-built
+          client-payload: '{"build_version": "${{ env.BUILD_VERSION }}"}'
 
 
       # - name: Create/Update Kubernetes Secret
