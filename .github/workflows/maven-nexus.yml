@@ -10,7 +10,7 @@ on:
 env:
   BUILD_VERSION: "1.3.${{ github.run_number }}"
   ARGOCD_SERVER: "127.0.0.1:8081"
-  ACR_PATH: "elpjfi080002acr.azurecr.io"
+  ACR_PATH: "cxdksf102326acr.azurecr.io"
 
 permissions:
   contents: write
@@ -28,13 +28,13 @@ jobs:
       - name: Build with Maven
         run: mvn -B clean verify install
 
-      # Run SonarQube analysis
-      - name: SonarQube Scan
-        run: |
-          sonar-scanner
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: powershell
+      # # Run SonarQube analysis
+      # - name: SonarQube Scan
+      #   run: |
+      #     sonar-scanner
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   shell: powershell
         
       # Upload artifact to Nexus
       - name: Deploy to Nexus
@@ -57,49 +57,49 @@ jobs:
             "-Dpassword=$env:NEXUS_PASS"
         shell: powershell
       
-      - name: Prepare artifact directory
-        run: |
-          mkdir -p application-artifact
-          cp target/*.war application-artifact/
+      # - name: Prepare artifact directory
+      #   run: |
+      #     mkdir -p application-artifact
+      #     cp target/*.war application-artifact/
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: weather-app1-${{ env.BUILD_VERSION }}.war
-          path: application-artifact
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v4.6.2
+      #   with:
+      #     name: weather-app1-${{ env.BUILD_VERSION }}.war
+      #     path: application-artifact
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: weather-app1.war
-          path: application-artifact
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v4.6.2
+      #   with:
+      #     name: weather-app1.war
+      #     path: application-artifact
     
-      # (Optional) Deploy to Tomcat if reachable
-      - name: Deploy WAR to Tomcat
-        env:
-          NEXUS_USER: ${{ secrets.NEXUS_USER }}
-          NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
-          TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
-          TOMCAT_PASS: ${{ secrets.TOMCAT_PASS }}
-        run: |
-          Write-Host "Downloading version $BUILD_VERSION"
+      # # (Optional) Deploy to Tomcat if reachable
+      # - name: Deploy WAR to Tomcat
+      #   env:
+      #     NEXUS_USER: ${{ secrets.NEXUS_USER }}
+      #     NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
+      #     TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
+      #     TOMCAT_PASS: ${{ secrets.TOMCAT_PASS }}
+      #   run: |
+      #     Write-Host "Downloading version $BUILD_VERSION"
 
-          # Correct Nexus artifact URL for artifactId weather-app
-          $ARTIFACT_URL = "http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app/$env:BUILD_VERSION/weather-app-$env:BUILD_VERSION.war"
-          Write-Host "Downloading from Nexus: $ARTIFACT_URL"
+      #     # Correct Nexus artifact URL for artifactId weather-app
+      #     $ARTIFACT_URL = "http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app/$env:BUILD_VERSION/weather-app-$env:BUILD_VERSION.war"
+      #     Write-Host "Downloading from Nexus: $ARTIFACT_URL"
 
-          # Create Nexus credential
-          $securePassword = ConvertTo-SecureString $env:NEXUS_PASS -AsPlainText -Force
-          $cred = New-Object System.Management.Automation.PSCredential($env:NEXUS_USER, $securePassword)
+      #     # Create Nexus credential
+      #     $securePassword = ConvertTo-SecureString $env:NEXUS_PASS -AsPlainText -Force
+      #     $cred = New-Object System.Management.Automation.PSCredential($env:NEXUS_USER, $securePassword)
 
-          # Download the WAR
-          Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile "weather-app1-$env:BUILD_VERSION.war" -Credential $cred
+      #     # Download the WAR
+      #     Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile "weather-app1-$env:BUILD_VERSION.war" -Credential $cred
 
-          # Deploy WAR to Tomcat
-          Write-Host "Deploying to Tomcat..."
-          $tomcatCred = New-Object System.Management.Automation.PSCredential($env:TOMCAT_USER, (ConvertTo-SecureString $env:TOMCAT_PASS -AsPlainText -Force))
-          Invoke-WebRequest -Uri "http://localhost:5556/manager/text/deploy?path=/weather-app1&update=true" -Method Put -InFile "weather-app1-$env:BUILD_VERSION.war" -Credential $tomcatCred
-        shell: powershell
+      #     # Deploy WAR to Tomcat
+      #     Write-Host "Deploying to Tomcat..."
+      #     $tomcatCred = New-Object System.Management.Automation.PSCredential($env:TOMCAT_USER, (ConvertTo-SecureString $env:TOMCAT_PASS -AsPlainText -Force))
+      #     Invoke-WebRequest -Uri "http://localhost:5556/manager/text/deploy?path=/weather-app1&update=true" -Method Put -InFile "weather-app1-$env:BUILD_VERSION.war" -Credential $tomcatCred
+      #   shell: powershell
 
   Continuous-Deployment:
     runs-on: self-hosted
@@ -152,13 +152,6 @@ jobs:
           --from-literal=OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }} `
           --dry-run=client -o yaml | kubectl apply -f -
     
-    # Update K8s manifest (patch image tag)
-    # Automatically update the container image tag in the manifest to match the build version
-    # - name: Update Kubernetes manifest
-    #   run: |
-    #     python -c "import pathlib; f=pathlib.Path('k8s/deployment.yaml'); f.write_text(f.read_text().replace('image:', 'image: ${{ ACR_PATH }}/myapp:${{ env.BUILD_VERSION }}'))"
-
-
     - name: Update Kubernetes manifest (PowerShell)
       shell: powershell
       run: |
@@ -176,81 +169,3 @@ jobs:
         git commit -m "Update deployment.yaml with image tag ${{ env.BUILD_VERSION }}"
         git push
 
-        
-    # # ArgoCD Sync
-    # # - name: ArgoCD Sync app
-    # #   run: |
-    # #     argocd app sync myapp `
-    # #       --grpc-web `
-    # #       --server ${{ env.ARGOCD_SERVER }} `
-    # #       --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} `
-    # #       --insecure
-    # - name: Set environment variables
-    #   run: |
-    #     $env:BUILD_VERSION = "1.3.${{ github.run_number }}"
-    #     $env:ARGOCD_SERVER = '127.0.0.1:8081'
-    #   shell: powershell
-      
-    # - name: Sync app via ArgoCD
-    #   run: |
-    #     # Start port-forward in a background job
-    #     $job = Start-Job {
-    #         kubectl port-forward svc/argocd-server -n argocd 8081:443
-    #     }
-        
-    #     # Wait until the port is open
-    #     Write-Host "Waiting for ArgoCD port-forward to be ready..."
-    #     do {
-    #         Start-Sleep -Seconds 2
-    #     } until ((Test-NetConnection -ComputerName 127.0.0.1 -Port 8081).TcpTestSucceeded)
-        
-    #     # Retry login up to 5 times
-    #     $loginSuccess = $false
-    #     for ($i=1; $i -le 5; $i++) {
-    #         try {
-    #             argocd login $env:ARGOCD_SERVER --username admin --password $env:ARGOCD_PASSWORD --grpc-web --insecure
-    #             $loginSuccess = $true
-    #             Write-Host "ArgoCD login successful!"
-    #             break
-    #         } catch {
-    #             Write-Host "Login attempt $i failed, retrying in 5 seconds..."
-    #             Start-Sleep -Seconds 5
-    #         }
-    #     }
-        
-    #     if (-not $loginSuccess) {
-    #         Write-Error "ArgoCD login failed after 5 attempts. Exiting."
-    #         Stop-Job $job
-    #         Remove-Job $job
-    #         exit 1
-    #     }
-        
-    #     # Sync the app
-    #     argocd app sync myapp --grpc-web --server $env:ARGOCD_SERVER --insecure
-        
-    #     # Stop and remove the port-forward job
-    #     Stop-Job $job
-    #     Remove-Job $job
-    #     Write-Host "Port-forward job stopped and removed."
-    #   shell: powershell
-          
-
-
-    # # - name: Start port-forward to ArgoCD (background)
-    # #   run: |
-    # #     # Start port-forward in background
-    # #     Start-Process -NoNewWindow -FilePath kubectl -ArgumentList "port-forward svc/argocd-server -n argocd 8081:443"
-    # #     # kubectl port-forward svc/argocd-server -n argocd 8081:443
-    # #     # Wait a few seconds for port-forward to be ready
-    # #     Start-Sleep -Seconds 30
-    # #   shell: powershell
-
-    # # - name: ArgoCD login
-    # #   run: |
-    # #     argocd login $env:ARGOCD_SERVER --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --grpc-web --insecure
-    # #   shell: powershell
-
-    # # - name: Sync app via ArgoCD
-    # #   run: |
-    # #     argocd app sync myapp --grpc-web --server $env:ARGOCD_SERVER --insecure
-    # #   shell: powershell
