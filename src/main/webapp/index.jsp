@@ -57,7 +57,7 @@
         <div><strong>Session GUID</strong></div>
         <code><%= guid %></code>
         <br>
-        <div class="hint">Application Version 1.3.1</div>
+        <div class="hint">Application Version 1.3.2</div>
     </div>
 
     <br/>
