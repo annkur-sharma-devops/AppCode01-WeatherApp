@@ -6,6 +6,33 @@ on:
   #   branches: [ "main" ]
   # pull_request:
   #   branches: [ "main" ]
+    inputs:
+      run_sonar:
+        description: "Run SonarQube Scan?"
+        required: true
+        default: "No"
+        type: choice
+        options:
+          - "Yes"
+          - "No"
+
+      prepare_artifact:
+        description: "Prepare artifact directory and upload?"
+        required: true
+        default: "No"
+        type: choice
+        options:
+          - "Yes"
+          - "No"
+
+      acr_login_upload:
+        description: "Upload build image to ACR"
+        required: true
+        default: "No"
+        type: choice
+        options:
+          - "Yes"
+          - "No"
 
 env:
   BUILD_VERSION: "1.3.${{ github.run_number }}"
@@ -28,13 +55,15 @@ jobs:
       - name: Build with Maven
         run: mvn -B clean verify install
 
-      # # Run SonarQube analysis
-      # - name: SonarQube Scan
-      #   run: |
-      #     sonar-scanner
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #   shell: powershell
+      # Run SonarQube analysis
+      # User input required for execution: input: run_sonar
+      - name: SonarQube Scan
+        if: ${{ github.event.inputs.run_sonar == 'Yes' }}
+        run: |
+          sonar-scanner
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
         
       # Upload artifact to Nexus
       - name: Deploy to Nexus
@@ -57,18 +86,23 @@ jobs:
             "-Dpassword=$env:NEXUS_PASS"
         shell: powershell
       
+      # User input required for execution: input: prepare_artifact
       - name: Prepare artifact directory
+        id: prepare-artifactory
+        if: ${{ github.event.inputs.prepare_artifact == 'Yes' }}
         run: |
           mkdir -p application-artifact
           cp target/*.war application-artifact/
 
+      # Executed if "Prepare artifact directory" is "Yes" and "Prepare artifact directory" is successfully executed
       - name: Upload artifact
+        if: ${{ github.event.inputs.prepare_artifact == 'Yes' && steps.prepare-artifactory.conclusion == 'success' }}
         uses: actions/upload-artifact@v4.6.2
         with:
           name: weather-app1-${{ env.BUILD_VERSION }}.war
           path: application-artifact
 
-        # Download artifact from Nexus
+      # Download artifact from Nexus
       - name: Download artifact from Nexus
         env:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
@@ -77,39 +111,57 @@ jobs:
           $ARTIFACT_URL="http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app/${{ env.BUILD_VERSION }}/weather-app-${{ env.BUILD_VERSION }}.war"
           Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile weather-app-${{ env.BUILD_VERSION }}.war -Credential (New-Object System.Management.Automation.PSCredential($env:NEXUS_USER,(ConvertTo-SecureString $env:NEXUS_PASS -AsPlainText -Force)))
 
+      # Azure login
+      # User input required for execution: input: acr_login_upload
       - name: Azure Login
+        if: ${{ github.event.inputs.acr_login_upload == 'Yes' }}
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
-        # Login to ACR
+      # Login to ACR
+      # User input required for execution: input: acr_login_upload
       - name: Azure Container Registry Login
+        if: ${{ github.event.inputs.acr_login_upload == 'Yes' }}
         uses: azure/docker-login@v2
         with:
           login-server: $env:ACR_PATH
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
-
+      
+      # Docker login to ACR
+      # User input required for execution: input: acr_login_upload
       - name: Docker login to ACR
+        if: ${{ github.event.inputs.acr_login_upload == 'Yes' }}
         run: |
           az acr login --name $env:ACR_PATH
         shell: powershell
-    
+
+      # Build docker image
+      # User input required for execution: input: acr_login_upload
       - name: Build Docker Image
+        if: ${{ github.event.inputs.acr_login_upload == 'Yes' }}
         run: |
           docker build `
             --build-arg BUILD_VERSION=${{ env.BUILD_VERSION }} `
             -t $env:ACR_PATH/myapp:${{ env.BUILD_VERSION }} .
 
+      # Push docker image to ACR
+      # User input required for execution: input: acr_login_upload
       - name: Push Docker Image
+        id: push-docker-image-to-acr
+        if: ${{ github.event.inputs.acr_login_upload == 'Yes' }}
         run: |
           docker push $env:ACR_PATH/myapp:${{ env.BUILD_VERSION }}
 
-
-      - name: Notify Deployment Repo (optional)
+      # Notify Deployment Repo (optional)
+      # User input required for execution: input: acr_login_upload
+      # Executed if "acr_login_upload" is "Yes" and "Push Docker Image" is successfully executed
+      - name: Notify Deployment Repo
+        if: ${{ github.event.inputs.acr_login_upload == 'Yes' && steps.push-docker-image-to-acr.conclusion == 'success' }}
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.PAT_DEPLOY_REPO_CLASSIC_TOKEN }}   # personal access token
+          token: ${{ secrets.PAT_DEPLOY_REPO_CLASSIC_TOKEN }}   # personal access token of Repo 2
           repository: annkur-sharma-devops/AppCode01-WeatherApp-K8s
           event-type: new-image-built
           client-payload: '{"build_version": "${{ env.BUILD_VERSION }}"}'
