@@ -106,7 +106,16 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           output: results
-          upload: always
+          # upload: always
+          category: "/language:java"
+          upload: true   # ✅ sends results to GitHub Security tab
+
+      - name: Upload CodeQL results as artifact
+        if: ${{ github.event.inputs.github_codeQL_analysis == 'Yes' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-sarif-results
+          path: results/*.sarif
 
       # Run SonarQube analysis
       # User input required for execution: input: run_sonar
