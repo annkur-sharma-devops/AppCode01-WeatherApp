@@ -69,16 +69,33 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      
+      # GitHub CodeQL analysis: Initialize
+      # User input required for execution: github_codeQL_analysis
+      - name: Initialize CodeQL
+        if: ${{ github.event.inputs.github_codeQL_analysis == 'Yes' }}
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java
+
       # Build with Maven
-      - name: Build with Maven
+      - name: Build project
         run: mvn -B clean verify install
 
-      # CodeQL analysis
-      - name: CodeQL Analysis
+      # GitHub CodeQL analysis: Autobuild
+      # User input required for execution: github_codeQL_analysis
+      - name: Autobuild (optional for Java, usually the above build is enough)
+        if: ${{ github.event.inputs.github_codeQL_analysis == 'Yes' }}
+        uses: github/codeql-action/autobuild@v3
+
+      # GitHub CodeQL analysis: Run
+      # User input required for execution: github_codeQL_analysis
+      - name: Run CodeQL Analysis
         if: ${{ github.event.inputs.github_codeQL_analysis == 'Yes' }}
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:java"
+          output: results
+          upload: always
 
       # Run SonarQube analysis
       # User input required for execution: input: run_sonar
