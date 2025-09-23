@@ -25,6 +25,24 @@ on:
           - "Yes"
           - "No"
 
+      trivy_scan:
+        description: "Run trivy image scan?"
+        required: true
+        default: "No"
+        type: choice
+        options:
+          - "Yes"
+          - "No"
+
+      github_codeQL_analysis:
+        description: "Run GitHub CodeQL scan?"
+        required: true
+        default: "No"
+        type: choice
+        options:
+          - "Yes"
+          - "No"
+
       acr_login_upload:
         description: "Upload build image to ACR"
         required: true
@@ -54,6 +72,13 @@ jobs:
       # Build with Maven
       - name: Build with Maven
         run: mvn -B clean verify install
+
+      # CodeQL analysis
+      - name: CodeQL Analysis
+        if: ${{ github.event.inputs.github_codeQL_analysis == 'Yes' }}
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:java"
 
       # Run SonarQube analysis
       # User input required for execution: input: run_sonar
@@ -146,6 +171,17 @@ jobs:
             --build-arg BUILD_VERSION=${{ env.BUILD_VERSION }} `
             -t $env:ACR_PATH/myapp:${{ env.BUILD_VERSION }} .
 
+      # Trivy image scan
+      - name: Trivy Scan
+        if: ${{ github.event.inputs.acr_login_upload == 'Yes' && github.event.inputs.trivy_scan == "Yes" }}
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ env.ACR_PATH }}/myapp:${{ env.BUILD_VERSION }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          format: table
+          exit-code: 0   # 1 = Fail pipeline if vulnerabilities found, 0 = Pass pipeline
+
       # Push docker image to ACR
       # User input required for execution: input: acr_login_upload
       - name: Push Docker Image
@@ -167,26 +203,5 @@ jobs:
           client-payload: '{"build_version": "${{ env.BUILD_VERSION }}"}'
 
 
-      # - name: Create/Update Kubernetes Secret
-      #   run: |
-      #     kubectl create secret generic weather-secrets `
-      #       --from-literal=OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }} `
-      #       --dry-run=client -o yaml | kubectl apply -f -
-      
-      # - name: Update Kubernetes manifest (PowerShell)
-      #   shell: powershell
-      #   run: |
-      #     $file = "k8s/deployment.yaml"
-      #     $content = Get-Content $file
-      #     $newContent = $content -replace 'image: .*', "image: ${{ env.ACR_PATH }}/myapp:${{ env.BUILD_VERSION }}   # <-- updated by pipeline"
-      #     Set-Content $file $newContent
 
-      # - name: Commit manifest update
-      #   shell: powershell
-      #   run: |
-      #     git config --global user.name "github-actions[bot]"
-      #     git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      #     git add k8s/deployment.yaml
-      #     git commit -m "Update deployment.yaml with image tag ${{ env.BUILD_VERSION }}"
-      #     git push
 
