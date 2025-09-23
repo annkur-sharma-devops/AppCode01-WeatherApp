@@ -173,7 +173,7 @@ jobs:
 
       # Trivy image scan
       - name: Trivy Scan
-        if: ${{ github.event.inputs.acr_login_upload == 'Yes' && github.event.inputs.trivy_scan == "Yes" }}
+        if: ${{ github.event.inputs.acr_login_upload == 'Yes' && github.event.inputs.trivy_scan == 'Yes' }}
         uses: aquasecurity/trivy-action@0.20.0
         with:
           image-ref: ${{ env.ACR_PATH }}/myapp:${{ env.BUILD_VERSION }}
