@@ -59,6 +59,7 @@ env:
 
 permissions:
   contents: write
+  security-events: write   # needed to upload CodeQL results
 
 jobs:
   Continuous-Integration:
@@ -77,6 +78,8 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: java
+          cli-download: false   # prevent automatic download
+          cli-path: C:\InstalledSoftwares\codeql\codeql.exe
 
       # Build with Maven
       - name: Build project
