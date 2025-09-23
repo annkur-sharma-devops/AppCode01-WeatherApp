@@ -194,13 +194,22 @@ jobs:
       # Trivy image scan
       - name: Trivy Scan
         if: ${{ github.event.inputs.acr_login_upload == 'Yes' && github.event.inputs.trivy_scan == 'Yes' }}
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: ${{ env.ACR_PATH }}/myapp:${{ env.BUILD_VERSION }}
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          format: table
-          exit-code: 0   # 1 = Fail pipeline if vulnerabilities found, 0 = Pass pipeline
+        shell: powershell
+        run: |
+          # Ensure Trivy CLI is installed and in PATH
+          # Download from https://aquasecurity.github.io/trivy/v0.44.0/getting-started/installation/#windows
+          $image = "${env:ACR_PATH}/myapp:${{ env.BUILD_VERSION }}"
+          Write-Host "Scanning image: $image"
+          
+          # Run Trivy scan
+          trivy image --severity CRITICAL,HIGH --ignore-unfixed --format table $image
+
+          # Optional: Fail pipeline if vulnerabilities found
+          $exitCode = $LASTEXITCODE
+          Write-Host "Trivy exited with code $exitCode"
+          
+          # Uncomment to fail pipeline on vulnerabilities:
+          # if ($exitCode -ne 0) { exit $exitCode }
 
       # Push docker image to ACR
       # User input required for execution: input: acr_login_upload
