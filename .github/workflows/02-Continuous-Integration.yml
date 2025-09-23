@@ -55,7 +55,7 @@ on:
 env:
   BUILD_VERSION: "1.4.${{ github.run_number }}"
   ARGOCD_SERVER: "127.0.0.1:8081"
-  ACR_PATH: "nierom031143acr.azurecr.io"
+  ACR_PATH: "whvtqa122836acr.azurecr.io"
 
 permissions:
   contents: write
