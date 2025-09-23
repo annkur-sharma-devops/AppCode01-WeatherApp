@@ -7,6 +7,15 @@ on:
   # pull_request:
   #   branches: [ "main" ]
     inputs:
+      github_codeQL_analysis:
+        description: "Run GitHub CodeQL scan?"
+        required: true
+        default: "No"
+        type: choice
+        options:
+          - "Yes"
+          - "No"
+      
       run_sonar:
         description: "Run SonarQube Scan?"
         required: true
@@ -34,15 +43,6 @@ on:
           - "Yes"
           - "No"
 
-      github_codeQL_analysis:
-        description: "Run GitHub CodeQL scan?"
-        required: true
-        default: "No"
-        type: choice
-        options:
-          - "Yes"
-          - "No"
-
       acr_login_upload:
         description: "Upload build image to ACR"
         required: true
@@ -52,9 +52,17 @@ on:
           - "Yes"
           - "No"
 
+      notify_deployment_repo:
+        description: "Run CD workflow?"
+        required: true
+        default: "No"
+        type: choice
+        options:
+          - "Yes"
+          - "No"
+
 env:
   BUILD_VERSION: "1.4.${{ github.run_number }}"
-  ARGOCD_SERVER: "127.0.0.1:8081"
   ACR_PATH: "whvtqa122836acr.azurecr.io"
 
 permissions:
@@ -223,7 +231,7 @@ jobs:
       # User input required for execution: input: acr_login_upload
       # Executed if "acr_login_upload" is "Yes" and "Push Docker Image" is successfully executed
       - name: Notify Deployment Repo
-        if: ${{ github.event.inputs.acr_login_upload == 'Yes' && steps.push-docker-image-to-acr.conclusion == 'success' }}
+        if: ${{ github.event.inputs.notify_deployment_repo == 'Yes' && github.event.inputs.acr_login_upload == 'Yes' && steps.push-docker-image-to-acr.conclusion == 'success' }}
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PAT_DEPLOY_REPO_CLASSIC_TOKEN }}   # personal access token of Repo 2
