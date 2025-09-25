@@ -63,7 +63,7 @@ on:
 
 env:
   BUILD_VERSION: "1.4.${{ github.run_number }}"
-  ACR_PATH: "whvtqa122836acr.azurecr.io"
+  ACR_PATH: "qqeupf092704acr.azurecr.io"
 
 permissions:
   contents: write
