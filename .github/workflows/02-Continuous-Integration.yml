@@ -171,7 +171,7 @@ jobs:
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
         run: |
           $ARTIFACT_URL="http://localhost:8899/repository/maven-release-repo-weather-app/com/example/weather-app/${{ env.BUILD_VERSION }}/weather-app-${{ env.BUILD_VERSION }}.war"
-          Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile weather-app-${{ env.BUILD_VERSION }}.war -Credential (New-Object System.Management.Automation.PSCredential($env:NEXUS_USER,(ConvertTo-SecureString $env:NEXUS_PASS -AsPlainText -Force)))
+          Invoke-WebRequest -Uri $ARTIFACT_URL -OutFile weather-app-${{ env.BUILD_VERSION }}.war -Credential (New-Object System.Management.Automation.PSCredential($env:NEXUS_USER,(ConvertTo-SecureString $env:NEXUS_PASS -AsPlainText -Force))) -AllowUnencryptedAuthentication
 
       # Azure login
       # User input required for execution: input: acr_login_upload
